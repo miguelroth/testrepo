@@ -1,0 +1,171 @@
+/*
+ Code zum Ansteuern von zwei Schrittmotoren und eines LCD.
+ Leuchten zweier LEDs und Anzeige eines Timers.
+ */
+
+//Schrittmotorbibliothek wird eingebunden
+#include <Stepper.h>
+
+// LCD Bibliothek 
+#include <LiquidCrystal.h>
+
+// Schritte pro Umdrehung für Schrittmotor 28BYJ-48 werden definiert (inkl. Getriebereduktion)
+const int stpPerRev = 2048;   
+
+// Initialisierung des Schrittmotors 1 mit Pins 8 bis 11
+// Initialisierung des Schrittmotors 2 mit Pins 4 bis 7
+Stepper SMotor1(stpPerRev, 8, 10, 9, 11);
+Stepper SMotor2(stpPerRev, 4, 6, 5, 7);
+
+// Initialisieren der LCD Bibliothek und Festlegung der benötigten Pins.
+
+const int rs = 33, en = 31, d4 = 22, d5 = 24, d6 = 26, d7 = 28;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+void setup() {
+  
+  // Geschwindigkeitsangabe ca. 15 rpm weil 17 absolutes limit ist (mit 2048 stpPerRev):
+  SMotor1.setSpeed(15);
+  SMotor2.setSpeed(15);
+  // Einstellung der einzelnen LCD Buchstabenplätze 
+  lcd.begin(16, 1);
+ 
+  //pin 50 für LED1 Maschinenbeleuchtung 
+  pinMode (50, OUTPUT);      
+  //pin 52 für LED2 
+  pinMode(52, OUTPUT);                                                                        
+  }
+
+ void loop() {
+  
+  //LED1 soll leuchten, während Programm abläuft (Maschinenbeleuchtung)                       
+    digitalWrite(50, HIGH);
+
+  // Ausgabe des folgenden Satzes auf dem Display 
+  lcd.print("Bitte Tasse hinstellen");
+  delay(2000);
+
+  // for-Schleife damit der Text drei mal über den display scrollt
+
+for ( int WiederholungText = 1 ; WiederholungText <= 3 ; WiederholungText++ ) {
+  
+  // Der Display-Text soll 8 Positionen nach links wandern und anschließend wieder nach rechts, sodass der Text vollständig gelesen werden kann.
+  // Scrolle 8 Position nach links 
+  for (int positionCounter = 0; positionCounter < 8; positionCounter++) {
+  lcd.scrollDisplayLeft();
+  // "Geschwindigkeit" des sich bewegenden Textes
+  delay(200);
+  }
+
+  //kurzes warten
+  delay(500);
+  
+  // Scrolle 8 Position nach rechts
+  for (int positionCounter = 0; positionCounter < 8; positionCounter++) {
+  lcd.scrollDisplayRight();
+  // "Geschwindigkeit"
+  delay(200);
+  }
+ delay(500);
+}
+
+lcd.clear();
+
+   // Ausgabe des folgenden Satzes auf dem Display 
+  lcd.print("Bitte Teebeutel einhaengen");
+  delay(2000);
+
+  // for-Schleife damit der Text drei mal über das Display scrollt
+
+for ( int WiederholungText = 1 ; WiederholungText <= 3 ; WiederholungText++ ) {
+  
+  // Der Display-Text soll 8 Positionen nach links wandern und anschließend wieder nach rechts, sodass der Text vollständig gelesen werden kann.
+  
+  // Scrolle 8 Position nach links 
+  for (int positionCounter = 0; positionCounter < 10; positionCounter++) {
+  lcd.scrollDisplayLeft();
+  // "Geschwindigkeit" des sich bewegenden Textes
+  delay(200);
+  }
+
+  //kurzes warten
+  delay(500);
+  
+  // Scrolle 8 Position nach rechts
+  for (int positionCounter = 0; positionCounter < 10; positionCounter++) {
+  lcd.scrollDisplayRight();
+  // "Geschwindigkeit"
+  delay(200);
+  }
+ delay(500);
+}
+lcd.clear();
+  
+  //Arm absenken, Teebeutel in die Tasse einlassen: 10 Umdrehungen 
+  SMotor1.step(-20480);
+  
+  //Timer für 3 Minuten mit LCD Ausgabe                                                               
+
+for(int t = 180; t>=0; t--) {
+
+//Variable m für Minuten
+//Gibt fehlende Zeit t in Sekunden geteilt durch 60 als Ganzzahl
+int m = t/60;
+//Variable s für Sekunden
+//Gibt den Rest der Rechnung t (in sek) durch 60
+int s = t%60;
+//verbleibende Zeit in Minuten und Sekunden werden auf dem LCD angezeigt
+lcd.print(" Ziehzeit: ");
+lcd.print(m);
+lcd.print(":");
+lcd.print(s);
+//mit delay 1000 wird jede Sekunde jeweils eine Sekunde angezeigt
+delay(1000);
+lcd.clear();
+
+}
+  //Arm anheben, Teebeutel herausziehen: 10 Umdrehungen
+  SMotor1.step(20480);
+  
+  
+   // Ausgabe des folgenden Satzes auf dem Display 
+  lcd.print("Tasse entnehmen");
+ 
+  //LED2 soll leuchten, nachdem Ziehzeit abgelaufen und Teebeutel angehoben ist
+  digitalWrite(52, HIGH);
+  
+  //Kann verlängert werden, damit Teebeutel über der Tasse abtropfen kann
+  delay(1000);
+  
+  //Drehung des Arms um 45°: 9 Umdrehungen
+  SMotor2.step(-18432);
+  
+  delay(1000);
+  
+  //Arm absenken: 12 Umdrehungen -> Teebeutel bis auf Boden befördern, damit dieser aus der Halterung rausrutschen kann
+  SMotor1.step(-24576);
+  
+  //Genug Zeit zum rausrutschen
+  delay(2000);
+  
+  //Arm anheben: 12 Umdrehungen
+  SMotor1.step(24576);
+  
+  delay(1000);
+  
+  //Drehung des Arms um 45° zurück in die Ausgangsposition: 9 Umdrehungen -> Fertig!
+  SMotor2.step(18432);
+  
+  //LED2 soll wieder erlischen, nachdem der Arm in die Ausgangsposition zurückgefahren ist
+  digitalWrite(52, LOW);
+
+  //Display Text soll sich löschen, nachdem der Arm in die Ausgangsposition zurückgefahren ist
+  lcd.clear();
+  
+  /*Nach den Befehlen sollen die Motoren stoppen.
+    Dafür wird eine leere ForSchleife benutzt, damit
+    der Code den Loop nicht wiederholt durchführt 
+   */
+  for(;;){}
+ 
+}

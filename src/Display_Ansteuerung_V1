@@ -1,0 +1,71 @@
+/*Library originally added 18 Apr 2008
+ by David A. Mellis
+ library modified 5 Jul 2009
+ by Limor Fried (http://www.ladyada.net)
+ example added 9 Jul 2009
+ by Tom Igoe
+ modified 22 Nov 2010
+ by Tom Igoe
+ modified 31 Mai 2018
+ by Marco Reckeweg
+ modified 03 June 2018
+ by Christian Künnemann
+
+ This example code is in the public domain.
+
+ http://www.arduino.cc/en/Tutorial/LiquidCrystalScroll
+
+*/
+
+// 1. Version eines Codes zur Ansteuerung eines Displays zur Ausgabe einfacher Anweisungen für den Benutzer
+
+// LCD Display Bibliothek wird benötigt
+#include <LiquidCrystal.h>
+
+// Initialisieren der Bibliothek und Festlegung der benötigten Pins.
+
+const int rs = 33, en = 31, d4 = 22, d5 = 24, d6 = 26, d7 = 28;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7); // Ansprechen des LCD mit 4 Bit
+
+// Einstellung der einzelnen LCD Buchstabenplätze 
+
+// Dokumentierte Funktion:
+// Zunächst muss
+
+void setup() { // Uebergabe der Displaykonfiguration
+  lcd.begin(16, 1); // Initiert das Displays mit 16 Zeichen länge für die erste Zeile
+  // Ausgabe des folgenden Satzes auf dem Display 
+  lcd.print("Bitte Tasse hinstellen");
+  delay(2000);
+}
+
+
+
+
+// Text soll 8 Positionen nach links wandern und anschließend wieder nach rechts, sodass der Text vollständig gelesen werden kann. 
+void loop() {
+
+   // Scrolle 8 Position nach links 
+   
+   for (int positionCounter = 0; positionCounter < 8; positionCounter++) {
+    lcd.scrollDisplayLeft();
+    // "Geschwindigkeit" des sich bewegenden Textes
+    delay(200);
+  }
+
+  //kurzes warten
+  delay(500)
+  
+// Scrolle 8 Position nach rechts
+ ;for (int positionCounter = 0; positionCounter < 8; positionCounter++) 
+ {
+    
+    lcd.scrollDisplayRight();
+    // "Geschwindigkeit"
+    delay(200);
+  }
+
+  //kurzes warten
+  delay(500);
+
+}
